@@ -164,7 +164,7 @@
     </div>
     <div class="icon" id="icon-about" style="top:110px;left:14px;" ondblclick="openWin('win-about','tb-about')">
       <svg width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="11" r="7" fill="#ffd6b0" stroke="#c08060" stroke-width="1"/><path d="M4 30 Q4 21 16 21 Q28 21 28 30" fill="#5080e0" stroke="#3060c0" stroke-width="1"/></svg>
-      <span>About Me</span>
+      <span>About me</span>
     </div>
     <div class="icon" id="icon-projects" style="top:206px;left:14px;" ondblclick="openWin('win-projects','tb-projects')">
       <svg width="32" height="32" viewBox="0 0 32 32"><rect x="2" y="9" width="28" height="19" rx="1" fill="#f0c060" stroke="#c09030" stroke-width="1"/><rect x="2" y="7" width="13" height="4" rx="1" fill="#e0b040" stroke="#c09030" stroke-width="1"/><rect x="6" y="15" width="20" height="2" rx="1" fill="#c09030" opacity="0.5"/><rect x="6" y="19" width="16" height="2" rx="1" fill="#c09030" opacity="0.5"/><rect x="6" y="23" width="18" height="2" rx="1" fill="#c09030" opacity="0.5"/></svg>
@@ -216,7 +216,7 @@ BIG thinker, and wannabe octopus.
 you'll find some stuff about me here such as:
 projects i've been balancing (precariously!),
 things i'm interested in, and a chat
-window where you can talk to my clone!
+window where you can talk to my clone
 
 PS.
 windows are draggable too
@@ -235,7 +235,7 @@ windows are draggable too
     </div>
   </div>
   <div class="win-body">
-    <div class="xp-section"><h3>&#128075; hi, i'm wendy</h3><p>i'm a developer and designer who loves building things on the web. i'm balancing multiple projects (new goal: be an octopus) and have a lot of opinions about everything (in a good way i promise).</p></div>
+    <div class="xp-section"><h3>&#128075; hi, i'm wendy</h3><p>i'm a developer and designer who loves building things on the web. i'm balancing multiple projects (new goal: be an octopus) and have lots of ideas to bring to life.</p></div>
     <div class="xp-section"><h3>&#127807; currently</h3><p>building my dream app (hint hint...it's finance-related), learning MORE things, trying to sleep at a normal time. the usual.</p></div>
     <div class="xp-section"><h3>&#128161; interests</h3><p>web dev &middot; design &middot; coffee &middot; 2000s-inspired personal websites &middot; games &middot; reading &middot; finance &middot; money!!!</p></div>
     <div class="xp-section"><h3>&#128236; find me</h3><p>github: <a href="https://github.com/wanyihuang" target="_blank" style="color:#000080;">wanyihuang</a><br>linkedin: <a href="https://www.linkedin.com/in/wendy-huang-116635191/" target="_blank" style="color:#000080;">wendy huang</a></p></div>
@@ -254,9 +254,9 @@ windows are draggable too
   </div>
   <div class="win-body">
     <div class="xp-section"><h3>&#128194; things i've made</h3></div>
-    <div class="xp-project"><h4>&#127760; this website</h4><p>windows xp aesthetic. mmm retro...</p></div>
-    <div class="xp-project"><h4>&#128187; other projects</h4><p>subscribe to my <a href="https://github.com/wanyihuang" target="_blank" style="color:#000080;">github</a> to stay updated!</p></div>
-    <div class="xp-project"><h4>&#128296; currently building</h4><p>my financial literacy, reading time, mechatronics brain. stay tuned :)</p></div>
+    <div class="xp-project"><h4>&#127760; this website</h4><p>my personal corner of the internet, built from scratch. windows xp aesthetic. mmm retro...</p></div>
+    <div class="xp-project"><h4>&#128187; other projects</h4><p>coming soon... an octopuss'ssss life is hard</p></div>
+    <div class="xp-project"><h4>&#128296; currently building</h4><p>more things. stay tuned :)</p></div>
   </div>
 </div>
 
@@ -277,7 +277,7 @@ windows are draggable too
     </a>
     <a class="link-item" href="https://www.linkedin.com/in/wendy-huang-116635191/" target="_blank" onclick="playClick()">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="#0077b5"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-      LinkedIn 
+      LinkedIn
     </a>
   </div>
 </div>
@@ -660,7 +660,36 @@ windows are draggable too
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); playAIMSend(); sendAIMMessage(); }
   });
 
-  setTimeout(function(){ openWin('win-wendy', 'tb-wendy'); }, 200);
+  function openWinAt(id, tbId, left, top) {
+    var win = document.getElementById(id);
+    win.style.display = 'flex'; win.style.zIndex = ++zTop;
+    win.dataset.positioned = '1';
+    win.style.left = left;
+    win.style.top  = top;
+    var tb = document.getElementById(tbId);
+    if (tb) tb.classList.add('visible');
+    playOpen();
+  }
+
+  setTimeout(function() {
+    // vw: the bigger the number, the more right it goes --->
+    // vh: the bigger the number, the more down it goes 
+    var vw = window.innerWidth, vh = window.innerHeight;
+    // wendy.txt — somewhat near the center (vw:490 is original positioning)
+    openWinAt('win-wendy',   'tb-wendy',   Math.round((vw - 390) / 2)+'px', Math.round(vh*0.40)+'px');
+
+    // About me — top left
+    openWinAt('win-about',   'tb-about',   Math.round(vw*0.26)+'px',        Math.round(vh*0.18)+'px');
+
+    // Projects — top right, pushed further right and lower than About me
+    openWinAt('win-projects','tb-projects',Math.round(vw*0.63)+'px',        Math.round(vh*0.30)+'px');
+
+    // Links — bottom left-center
+    openWinAt('win-links',   'tb-links',   Math.round(vw*0.28)+'px',        Math.round(vh*0.70)+'px');
+
+    // bring wendy.txt to front
+    document.getElementById('win-wendy').style.zIndex = ++zTop;
+  }, 200);
 
   // ════════════════════════════════════════════════
   // HK MAHJONG ENGINE
@@ -910,7 +939,7 @@ windows are draggable too
         }
       } else {
         G.phase = 'botdiscard';
-        setTimeout(botTurn, 1100);
+        setTimeout(botTurn, 1800);
       }
       render();
     }
@@ -995,7 +1024,7 @@ windows are draggable too
           G.turn = b;
           G.phase = 'botdiscard';
           render();
-          setTimeout(botTurn, 1100);
+          setTimeout(botTurn, 1800);
           return;
         }
       }
@@ -1016,7 +1045,7 @@ windows are draggable too
           G.turn = next;
           G.phase = 'botdiscard';
           render();
-          setTimeout(botTurn, 1100);
+          setTimeout(botTurn, 1800);
           return;
         }
       }
@@ -1028,7 +1057,7 @@ windows are draggable too
       G.turn = (fromPlayer+1)%4;
       G.phase = 'draw';
       render();
-      if (G.turn !== 0) setTimeout(drawTile, 1000);
+      if (G.turn !== 0) setTimeout(drawTile, 1400);
       else setTimeout(drawTile, 800);
     }
 
@@ -1124,7 +1153,7 @@ windows are draggable too
       G.turn = (fromPlayer+1)%4;
       G.phase='draw';
       render();
-      if (G.turn!==0) setTimeout(drawTile,1100);
+      if (G.turn!==0) setTimeout(drawTile,1400);
       else setTimeout(drawTile,800);
     }
 
