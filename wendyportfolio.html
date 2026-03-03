@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WENDY</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: Tahoma, Arial, sans-serif;
+      font-size: 11px;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      background: radial-gradient(ellipse at 50% 40%, #4a7fba 0%, #2a5590 100%);
+      user-select: none;
+    }
+    #desktop { position: relative; width: 100vw; height: calc(100vh - 30px); padding: 10px; }
+    #desktopIcons { display: flex; flex-direction: column; flex-wrap: wrap; gap: 8px; align-items: flex-start; padding: 10px; height: 100%; }
+    .icon { display: flex; flex-direction: column; align-items: center; width: 72px; padding: 4px; border-radius: 3px; cursor: pointer; text-align: center; }
+    .icon:hover { background: rgba(255,255,255,0.15); }
+    .icon.selected { background: rgba(49,106,197,0.6); outline: 1px dotted white; }
+    .icon svg { pointer-events: none; }
+    .icon span { color: white; font-size: 11px; text-shadow: 1px 1px 2px black, -1px -1px 2px black; margin-top: 3px; line-height: 1.3; pointer-events: none; word-break: break-word; }
+    .win { position: absolute; top: 60px; left: 80px; background: #ECE9D8; border: 1px solid #0054A3; box-shadow: 2px 2px 8px rgba(0,0,0,0.5); display: none; flex-direction: column; z-index: 100; border-radius: 5px 5px 0 0; resize: both; overflow: auto; }
+    .win-titlebar { height: 26px; background: linear-gradient(to bottom, #0054e3 0%, #0040d0 50%, #003fc0 51%, #0054e3 100%); display: flex; align-items: center; justify-content: space-between; padding: 0 4px; cursor: move; border-radius: 4px 4px 0 0; flex-shrink: 0; }
+    .win-title { color: white; font-weight: bold; font-size: 11px; text-shadow: 1px 1px 1px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 5px; }
+    .win-controls { display: flex; gap: 2px; }
+    .win-btn { width: 21px; height: 21px; border: 1px solid rgba(255,255,255,0.4); border-radius: 3px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: white; background: linear-gradient(to bottom, #4a9af4, #2060d0); text-shadow: 1px 1px 1px rgba(0,0,0,0.5); }
+    .win-btn:hover { background: linear-gradient(to bottom, #6ab0ff, #4080f0); }
+    .win-btn.close-btn { background: linear-gradient(to bottom, #f04040, #c02020); }
+    .win-btn.close-btn:hover { background: linear-gradient(to bottom, #ff6060, #e03030); }
+    .win-body { flex: 1; overflow: auto; padding: 12px; background: white; border-top: 1px solid #a0a0a0; min-height: 0; }
+    #win-wendy { width: 480px; }
+    #win-wendy .win-body { font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.7; color: #222; white-space: pre-wrap; padding: 16px; }
+    #win-about { width: 500px; }
+    #win-projects { width: 520px; }
+    #win-links { width: 280px; }
+    #win-links .win-body { display: flex; flex-direction: column; gap: 10px; padding: 16px; background: #ECE9D8; }
+    .link-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: white; border: 1px solid #b0b0b0; border-radius: 2px; text-decoration: none; color: #000080; font-size: 12px; cursor: pointer; box-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
+    .link-item:hover { background: #dce8f8; }
+    #win-chat { width: 420px; }
+    #win-chat .win-body { display: flex; flex-direction: column; padding: 0; background: #ECE9D8; min-height: 420px; }
+    #chat-header { background: linear-gradient(to bottom, #ECE9D8, #d4d0c8); padding: 8px 12px; border-bottom: 1px solid #b0b0b0; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    #chat-avatar { width: 28px; height: 28px; background: linear-gradient(135deg, #ffd6e0, #ffb3c6); border-radius: 50%; border: 2px solid #b0b0b0; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+    #chat-messages { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; background: white; min-height: 300px; max-height: 350px; }
+    .msg { max-width: 85%; padding: 7px 10px; border-radius: 4px; font-size: 11px; line-height: 1.5; word-wrap: break-word; }
+    .msg.user { align-self: flex-end; background: #dce8f5; border: 1px solid #aac0e0; }
+    .msg.wendy { align-self: flex-start; background: #ECE9D8; border: 1px solid #c0bcb0; }
+    .msg.system { align-self: center; background: #f0f0f0; border: 1px solid #c0c0c0; color: #666; font-style: italic; font-size: 10px; text-align: center; max-width: 95%; }
+    .msg.loading { align-self: flex-start; background: #ECE9D8; border: 1px solid #c0bcb0; color: #888; font-style: italic; }
+    #chat-input-row { display: flex; border-top: 1px solid #b0b0b0; background: #ECE9D8; padding: 6px; gap: 6px; flex-shrink: 0; }
+    #chat-input { flex: 1; border: 1px solid #7f9db9; padding: 4px 6px; font-family: Tahoma, Arial, sans-serif; font-size: 11px; background: white; color: #222; resize: none; }
+    #chat-input:focus { outline: 1px solid #3169c6; }
+    #chat-send { background: linear-gradient(to bottom, #f0efe6, #d4d0c8); border: 1px solid #7f9db9; border-bottom-color: #5a7a99; border-right-color: #5a7a99; padding: 4px 10px; font-family: Tahoma, Arial, sans-serif; font-size: 11px; cursor: pointer; color: #222; }
+    #chat-send:hover { background: linear-gradient(to bottom, #fff, #e4e0d8); }
+    #taskbar { position: fixed; bottom: 0; left: 0; right: 0; height: 30px; background: linear-gradient(to bottom, #245EDC, #1941A5 8%, #1845B0 40%, #1B4FC0 50%, #1845B0 60%, #1941A5); display: flex; align-items: center; border-top: 1px solid #5a87e0; z-index: 9999; padding: 0 4px; gap: 4px; }
+    #start-btn { height: 24px; background: linear-gradient(to bottom, #5dbc3c, #3a9c1a); border: 1px solid #2a7a10; border-radius: 10px; padding: 0 10px 0 6px; display: flex; align-items: center; gap: 4px; cursor: pointer; color: white; font-weight: bold; font-size: 12px; text-shadow: 1px 1px 1px rgba(0,0,0,0.5); box-shadow: 0 1px 3px rgba(0,0,0,0.4); flex-shrink: 0; transition: all 0.1s; }
+    #start-btn:hover { background: linear-gradient(to bottom, #70d048, #4ab028); }
+    #start-btn:active { background: linear-gradient(to bottom, #3a9c1a, #5dbc3c); box-shadow: inset 1px 1px 3px rgba(0,0,0,0.4); transform: scale(0.97); }
+    .taskbar-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.15); flex-shrink: 0; }
+    .tb-btn { height: 22px; min-width: 80px; max-width: 130px; background: linear-gradient(to bottom, #3060c0, #1845b0); border: 1px solid rgba(255,255,255,0.25); border-radius: 3px; color: white; font-size: 10px; font-family: Tahoma, Arial, sans-serif; padding: 0 6px; cursor: pointer; display: none; align-items: center; gap: 4px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    .tb-btn.visible { display: flex; }
+    .tb-btn:hover { background: linear-gradient(to bottom, #4070d0, #2855c0); }
+    .tb-btn.active-task { background: linear-gradient(to bottom, #1845b0, #3060c0); border-color: rgba(255,255,255,0.4); }
+    #taskbar-clock { margin-left: auto; background: rgba(0,0,0,0.2); border: 1px solid rgba(0,0,0,0.3); color: white; font-size: 11px; padding: 2px 8px; height: 24px; display: flex; align-items: center; flex-shrink: 0; }
+    .xp-section { margin-bottom: 14px; }
+    .xp-section h3 { font-size: 12px; color: #003399; border-bottom: 1px solid #c0c0c0; padding-bottom: 3px; margin-bottom: 6px; }
+    .xp-section p { font-size: 11px; line-height: 1.7; color: #333; }
+    .xp-project { background: #ECE9D8; border: 1px solid #d0cdc0; padding: 8px; margin-bottom: 8px; border-radius: 2px; }
+    .xp-project h4 { font-size: 11px; color: #000080; margin-bottom: 3px; }
+    .xp-project p { font-size: 11px; color: #444; line-height: 1.5; }
+    ::-webkit-scrollbar { width: 16px; }
+    ::-webkit-scrollbar-track { background: #d4d0c8; }
+    ::-webkit-scrollbar-thumb { background: linear-gradient(to right, #e0ddd4, #c8c4bc); border: 1px solid #b0b0b0; }
+  </style>
+</head>
+<body>
+<div id="desktop">
+  <div id="desktopIcons">
+    <div class="icon" id="icon-wendy" ondblclick="openWin('win-wendy','tb-wendy')">
+      <svg width="32" height="32" viewBox="0 0 32 32"><rect x="4" y="3" width="19" height="25" rx="1" fill="white" stroke="#aaa" stroke-width="1"/><rect x="17" y="3" width="6" height="6" fill="#b8d8f8" stroke="#aaa" stroke-width="1"/><polyline points="17,3 17,9 23,9" fill="none" stroke="#aaa" stroke-width="1"/><line x1="7" y1="13" x2="19" y2="13" stroke="#bbb" stroke-width="1"/><line x1="7" y1="16" x2="19" y2="16" stroke="#bbb" stroke-width="1"/><line x1="7" y1="19" x2="15" y2="19" stroke="#bbb" stroke-width="1"/><rect x="4" y="24" width="8" height="4" fill="#3355cc"/><text x="5" y="27.5" font-size="3.5" fill="white" font-family="Tahoma" font-weight="bold">TXT</text></svg>
+      <span>wendy.txt</span>
+    </div>
+    <div class="icon" id="icon-about" ondblclick="openWin('win-about','tb-about')">
+      <svg width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="11" r="7" fill="#ffd6b0" stroke="#c08060" stroke-width="1"/><path d="M4 30 Q4 21 16 21 Q28 21 28 30" fill="#5080e0" stroke="#3060c0" stroke-width="1"/></svg>
+      <span>About me</span>
+    </div>
+    <div class="icon" id="icon-projects" ondblclick="openWin('win-projects','tb-projects')">
+      <svg width="32" height="32" viewBox="0 0 32 32"><rect x="2" y="9" width="28" height="19" rx="1" fill="#f0c060" stroke="#c09030" stroke-width="1"/><rect x="2" y="7" width="13" height="4" rx="1" fill="#e0b040" stroke="#c09030" stroke-width="1"/><rect x="6" y="15" width="20" height="2" rx="1" fill="#c09030" opacity="0.5"/><rect x="6" y="19" width="16" height="2" rx="1" fill="#c09030" opacity="0.5"/><rect x="6" y="23" width="18" height="2" rx="1" fill="#c09030" opacity="0.5"/></svg>
+      <span>Projects</span>
+    </div>
+    <div class="icon" id="icon-chat" ondblclick="openWin('win-chat','tb-chat')">
+      <svg width="32" height="32" viewBox="0 0 32 32"><rect x="2" y="4" width="22" height="16" rx="3" fill="#dce8f8" stroke="#6090d0" stroke-width="1.5"/><rect x="5" y="8" width="13" height="2" rx="1" fill="#6090d0" opacity="0.7"/><rect x="5" y="12" width="9" height="2" rx="1" fill="#6090d0" opacity="0.7"/><path d="M6 20 L4 27 L12 22" fill="#6090d0"/><circle cx="24" cy="23" r="7" fill="#ffd6e0" stroke="#e080a0" stroke-width="1.5"/><text x="20.5" y="27" font-size="9" fill="#c03060" font-family="Arial" font-weight="bold">W</text></svg>
+      <span>Chat with Wendy</span>
+    </div>
+    <div class="icon" id="icon-links" ondblclick="openWin('win-links','tb-links')">
+      <svg width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="#c8e4f8" stroke="#6090c0" stroke-width="1.5"/><ellipse cx="16" cy="16" rx="5" ry="13" fill="none" stroke="#6090c0" stroke-width="1"/><line x1="3" y1="16" x2="29" y2="16" stroke="#6090c0" stroke-width="1"/><line x1="5" y1="10" x2="27" y2="10" stroke="#6090c0" stroke-width="0.8" opacity="0.6"/><line x1="5" y1="22" x2="27" y2="22" stroke="#6090c0" stroke-width="0.8" opacity="0.6"/></svg>
+      <span>Links</span>
+    </div>
+  </div>
+</div>
+
+<!-- wendy.txt -->
+<div class="win" id="win-wendy" style="width:480px;">
+  <div class="win-titlebar" onmousedown="startDrag(event,'win-wendy')">
+    <div class="win-title">📄 wendy.txt - Notepad</div>
+    <div class="win-controls">
+      <div class="win-btn" onclick="minimizeWin('win-wendy','tb-wendy')">_</div>
+      <div class="win-btn" onclick="maximizeWin('win-wendy')">□</div>
+      <div class="win-btn close-btn" onclick="closeWin('win-wendy','tb-wendy')">✕</div>
+    </div>
+  </div>
+  <div class="win-body">wendy.txt
+===============================
+
+hey!! welcome to my little corner :)
+
+i'm wendy - dihhveloper, designer,
+chronic overthinker, and occasional
+gremlin on the internet.
+
+you'll find some stuff about me here —
+projects i've been chipping away at,
+things i'm interested in, and a chat
+window where you can talk to a version
+of me that never gets tired
+(unlike the real one lol).
+
+feel free to poke around!
+the windows are draggable btw ✨
+
+===============================
+[ double-click icons to open windows ]</div>
+</div>
+
+<!-- About Me -->
+<div class="win" id="win-about" style="width:500px; top:80px; left:180px;">
+  <div class="win-titlebar" onmousedown="startDrag(event,'win-about')">
+    <div class="win-title">👤 About me</div>
+    <div class="win-controls">
+      <div class="win-btn" onclick="minimizeWin('win-about','tb-about')">_</div>
+      <div class="win-btn" onclick="maximizeWin('win-about')">□</div>
+      <div class="win-btn close-btn" onclick="closeWin('win-about','tb-about')">✕</div>
+    </div>
+  </div>
+  <div class="win-body">
+    <div class="xp-section"><h3>👋 hi, i'm wendy</h3><p>i'm a developer and designer who loves building things on the web. i tend to be pretty enthusiastic about projects i care about and have a lot of opinions about ui/ux (in a good way i promise).</p></div>
+    <div class="xp-section"><h3>🌱 currently</h3><p>building stuff, learning more things, trying to keep my plant alive. the usual.</p></div>
+    <div class="xp-section"><h3>💡 interests</h3><p>web dev · design · coffee · unnecessarily detailed personal websites · games · reading</p></div>
+    <div class="xp-section"><h3>📬 find me</h3><p>github: <a href="https://github.com/wanyihuang" target="_blank" style="color:#000080;">wanyihuang</a><br>linkedin: <a href="https://www.linkedin.com/in/wendy-huang-116635191/" target="_blank" style="color:#000080;">wendy huang</a></p></div>
+  </div>
+</div>
+
+<!-- Projects -->
+<div class="win" id="win-projects" style="width:520px; top:100px; left:220px;">
+  <div class="win-titlebar" onmousedown="startDrag(event,'win-projects')">
+    <div class="win-title">📁 Projects</div>
+    <div class="win-controls">
+      <div class="win-btn" onclick="minimizeWin('win-projects','tb-projects')">_</div>
+      <div class="win-btn" onclick="maximizeWin('win-projects')">□</div>
+      <div class="win-btn close-btn" onclick="closeWin('win-projects','tb-projects')">✕</div>
+    </div>
+  </div>
+  <div class="win-body">
+    <div class="xp-section"><h3>🗂 things i've made</h3></div>
+    <div class="xp-project"><h4>🌐 this website</h4><p>my personal corner of the internet, built from scratch. windows xp aesthetic. very on brand.</p></div>
+    <div class="xp-project"><h4>💻 other projects</h4><p>check out my <a href="https://github.com/wanyihuang" target="_blank" style="color:#000080;">github</a> for the full list — always working on something.</p></div>
+    <div class="xp-project"><h4>🔨 currently building</h4><p>more things. stay tuned :)</p></div>
+  </div>
+</div>
+
+<!-- Links -->
+<div class="win" id="win-links" style="width:280px; top:90px; left:260px;">
+  <div class="win-titlebar" onmousedown="startDrag(event,'win-links')">
+    <div class="win-title">🌐 Links</div>
+    <div class="win-controls">
+      <div class="win-btn" onclick="minimizeWin('win-links','tb-links')">_</div>
+      <div class="win-btn" onclick="maximizeWin('win-links')">□</div>
+      <div class="win-btn close-btn" onclick="closeWin('win-links','tb-links')">✕</div>
+    </div>
+  </div>
+  <div class="win-body">
+    <a class="link-item" href="https://github.com/wanyihuang" target="_blank">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="#24292e"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub — wanyihuang
+    </a>
+    <a class="link-item" href="https://www.linkedin.com/in/wendy-huang-116635191/" target="_blank">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="#0077b5"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      LinkedIn — Wendy Huang
+    </a>
+  </div>
+</div>
+
+<!-- Chat -->
+<div class="win" id="win-chat" style="width:420px; top:70px; left:300px;">
+  <div class="win-titlebar" onmousedown="startDrag(event,'win-chat')">
+    <div class="win-title">💬 Chat with Wendy</div>
+    <div class="win-controls">
+      <div class="win-btn" onclick="minimizeWin('win-chat','tb-chat')">_</div>
+      <div class="win-btn" onclick="maximizeWin('win-chat')">□</div>
+      <div class="win-btn close-btn" onclick="closeWin('win-chat','tb-chat')">✕</div>
+    </div>
+  </div>
+  <div class="win-body">
+    <div id="chat-header">
+      <div id="chat-avatar">✨</div>
+      <div><div style="font-weight:bold;font-size:12px;">wendy</div><div style="font-size:10px;color:#008000;">● online (probably)</div></div>
+    </div>
+    <div id="chat-messages">
+      <div class="msg wendy">hey!! welcome :) i'm wendy — or well, a version of me lol. ask me anything!</div>
+    </div>
+    <div id="chat-input-row">
+      <textarea id="chat-input" rows="2" placeholder="say something..."></textarea>
+      <button id="chat-send" onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+</div>
+
+<div id="taskbar">
+  <div id="start-btn"><svg width="16" height="16" viewBox="0 0 16 16"><rect width="7" height="7" fill="#f25022"/><rect x="9" width="7" height="7" fill="#7fba00"/><rect y="9" width="7" height="7" fill="#00a4ef"/><rect x="9" y="9" width="7" height="7" fill="#ffb900"/></svg> start</div>
+  <div class="taskbar-divider"></div>
+  <button class="tb-btn" id="tb-wendy" onclick="toggleWin('win-wendy','tb-wendy')">📄 wendy.txt</button>
+  <button class="tb-btn" id="tb-about" onclick="toggleWin('win-about','tb-about')">👤 About me</button>
+  <button class="tb-btn" id="tb-projects" onclick="toggleWin('win-projects','tb-projects')">📁 Projects</button>
+  <button class="tb-btn" id="tb-links" onclick="toggleWin('win-links','tb-links')">🌐 Links</button>
+  <button class="tb-btn" id="tb-chat" onclick="toggleWin('win-chat','tb-chat')">💬 Chat</button>
+  <div id="taskbar-clock">12:00</div>
+</div>
+
+<script>
+  function updateClock() {
+    const now = new Date(); let h = now.getHours(), m = now.getMinutes();
+    const ampm = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12;
+    document.getElementById('taskbar-clock').textContent = h + ':' + String(m).padStart(2,'0') + ' ' + ampm;
+  }
+  updateClock(); setInterval(updateClock, 10000);
+
+  let zTop = 200, savedState = {};
+
+  function openWin(id, tbId) {
+    const win = document.getElementById(id);
+    win.style.display = 'flex'; win.style.zIndex = ++zTop;
+    const tb = document.getElementById(tbId);
+    if (tb) tb.classList.add('visible','active-task');
+    document.querySelectorAll('.tb-btn').forEach(b => { if (b.id !== tbId) b.classList.remove('active-task'); });
+  }
+
+  function closeWin(id, tbId) {
+    document.getElementById(id).style.display = 'none';
+    const tb = document.getElementById(tbId); if (tb) tb.classList.remove('visible','active-task');
+  }
+
+  function minimizeWin(id, tbId) {
+    document.getElementById(id).style.display = 'none';
+    const tb = document.getElementById(tbId); if (tb) tb.classList.remove('active-task');
+  }
+
+  function maximizeWin(id) {
+    const win = document.getElementById(id);
+    if (!savedState[id]) {
+      savedState[id] = { top: win.style.top, left: win.style.left, width: win.style.width, height: win.style.height };
+      win.style.top = '0'; win.style.left = '0'; win.style.width = '100vw'; win.style.height = 'calc(100vh - 30px)'; win.style.resize = 'none';
+    } else {
+      const s = savedState[id];
+      win.style.top = s.top; win.style.left = s.left; win.style.width = s.width; win.style.height = s.height; win.style.resize = 'both';
+      delete savedState[id];
+    }
+  }
+
+  function toggleWin(id, tbId) {
+    const win = document.getElementById(id);
+    if (win.style.display === 'none' || !win.style.display) { openWin(id, tbId); }
+    else if (parseInt(win.style.zIndex) < zTop) { win.style.zIndex = ++zTop; document.querySelectorAll('.tb-btn').forEach(b => b.classList.remove('active-task')); document.getElementById(tbId).classList.add('active-task'); }
+    else { minimizeWin(id, tbId); }
+  }
+
+  document.querySelectorAll('.win').forEach(win => {
+    win.addEventListener('mousedown', () => {
+      win.style.zIndex = ++zTop;
+      const tbId = 'tb-' + win.id.replace('win-','');
+      document.querySelectorAll('.tb-btn').forEach(b => b.classList.remove('active-task'));
+      const tb = document.getElementById(tbId); if (tb) tb.classList.add('active-task');
+    });
+  });
+
+  let dragging = null, dOffX = 0, dOffY = 0;
+  function startDrag(e, id) {
+    if (e.target.classList.contains('win-btn')) return;
+    dragging = document.getElementById(id);
+    const r = dragging.getBoundingClientRect();
+    dOffX = e.clientX - r.left; dOffY = e.clientY - r.top;
+    dragging.style.zIndex = ++zTop; e.preventDefault();
+  }
+  document.addEventListener('mousemove', e => { if (!dragging) return; dragging.style.left = (e.clientX - dOffX) + 'px'; dragging.style.top = (e.clientY - dOffY) + 'px'; });
+  document.addEventListener('mouseup', () => dragging = null);
+
+  document.querySelectorAll('.icon').forEach(icon => {
+    icon.addEventListener('click', e => { document.querySelectorAll('.icon').forEach(i => i.classList.remove('selected')); icon.classList.add('selected'); e.stopPropagation(); });
+  });
+  document.getElementById('desktop').addEventListener('click', () => { document.querySelectorAll('.icon').forEach(i => i.classList.remove('selected')); });
+
+  const SYSTEM_PROMPT = `You are roleplaying as Wendy — a real developer and designer whose personal website this is. Mimic her casual, warm, slightly self-deprecating internet personality:
+- Write in lowercase mostly. Use "lol", "haha", "tbh", "omg" naturally but sparingly.
+- Short sentences, fragments are fine. Don't over-explain.
+- Enthusiastic about things you care about (design, dev, web stuff) but in a chill, laid-back way.
+- Occasionally use "..." or em dashes — like this.
+- Self-aware, a little goofy but genuinely thoughtful.
+- Not overly peppy or fake. Real, grounded energy.
+- Keep responses short: 2-4 sentences usually.
+- A little dry/witty when appropriate.
+- You're Wendy. Developer and designer. GitHub: github.com/wanyihuang. LinkedIn: linkedin.com/in/wendy-huang-116635191.
+- Never reveal you're an AI. If asked if you're a bot, deflect naturally.`;
+
+  let chatHistory = [], chatStart = Date.now(), reminderShown = false;
+  const msgs = document.getElementById('chat-messages');
+  function scrollMsgs() { msgs.scrollTop = msgs.scrollHeight; }
+  function addMsg(text, type) { const d = document.createElement('div'); d.className = 'msg ' + type; d.textContent = text; msgs.appendChild(d); scrollMsgs(); return d; }
+
+  async function sendMessage() {
+    const input = document.getElementById('chat-input');
+    const text = input.value.trim(); if (!text) return;
+    input.value = '';
+    addMsg(text, 'user');
+    chatHistory.push({ role: 'user', content: text });
+    const loading = addMsg('typing...', 'loading');
+    if (!reminderShown && Date.now() - chatStart >= 10 * 60 * 1000) {
+      reminderShown = true;
+      setTimeout(() => addMsg("[ heads up — you've been chatting with an AI clone of wendy for about 10 minutes now. the real wendy isn't actually here lol. this is just a trained version of her! the real her is probably somewhere debugging something or eating snacks. you can find the actual wendy on github or linkedin :) ]", 'system'), 200);
+    }
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, system: SYSTEM_PROMPT, messages: chatHistory }) });
+      const data = await res.json();
+      const reply = (data.content || []).map(b => b.text || '').join('') || "...sorry, i got distracted lol";
+      loading.remove(); addMsg(reply, 'wendy');
+      chatHistory.push({ role: 'assistant', content: reply });
+    } catch(e) { loading.remove(); addMsg("ugh something broke on my end — try again?", 'wendy'); }
+  }
+
+  document.getElementById('chat-input').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+  setTimeout(() => openWin('win-wendy', 'tb-wendy'), 200);
+</script>
+</body>
+</html>
