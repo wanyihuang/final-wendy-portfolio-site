@@ -216,7 +216,7 @@ BIG thinker, and wannabe octopus.
 you'll find some stuff about me here such as:
 projects i've been balancing (precariously!),
 things i'm interested in, and a chat
-window where you can talk to my clone
+window where you can talk to computer wendy
 
 PS.
 windows are draggable too
@@ -235,8 +235,8 @@ windows are draggable too
     </div>
   </div>
   <div class="win-body">
-    <div class="xp-section"><h3>&#128075; hi, i'm wendy</h3><p>i'm a developer and designer who loves building things on the web. i'm balancing multiple projects (new goal: be an octopus) and have lots of ideas to bring to life.</p></div>
-    <div class="xp-section"><h3>&#127807; currently</h3><p>building my dream app (hint hint...it's finance-related), learning MORE things, trying to sleep at a normal time. the usual.</p></div>
+    <div class="xp-section"><h3>&#128075; hi, i'm wendy</h3><p>i'm a developer and designer who loves building things on the web. i'm balancing multiple projects (new goal: be an octopus) and am constantly teeming with all these ideas!</p></div>
+    <div class="xp-section"><h3>&#127807; currently</h3><p>building my dream app (hint hint...it's finance-related), learning MORE things, trying to sleep at a normal time.</p></div>
     <div class="xp-section"><h3>&#128161; interests</h3><p>web dev &middot; design &middot; coffee &middot; 2000s-inspired personal websites &middot; games &middot; reading &middot; finance &middot; money!!!</p></div>
     <div class="xp-section"><h3>&#128236; find me</h3><p>github: <a href="https://github.com/wanyihuang" target="_blank" style="color:#000080;">wanyihuang</a><br>linkedin: <a href="https://www.linkedin.com/in/wendy-huang-116635191/" target="_blank" style="color:#000080;">wendy huang</a></p></div>
   </div>
@@ -254,8 +254,8 @@ windows are draggable too
   </div>
   <div class="win-body">
     <div class="xp-section"><h3>&#128194; things i've made</h3></div>
-    <div class="xp-project"><h4>&#127760; this website</h4><p>my personal corner of the internet, built from scratch. windows xp aesthetic. mmm retro...</p></div>
-    <div class="xp-project"><h4>&#128187; other projects</h4><p>coming soon... an octopuss'ssss life is hard</p></div>
+    <div class="xp-project"><h4>&#127760; this website</h4><p>windows xp aesthetic. so retro!</p></div>
+    <div class="xp-project"><h4>&#128187; other projects</h4><p>thinking of creating a news app :)</p></div>
     <div class="xp-project"><h4>&#128296; currently building</h4><p>more things. stay tuned :)</p></div>
   </div>
 </div>
@@ -672,8 +672,8 @@ windows are draggable too
   }
 
   setTimeout(function() {
-    // vw: the bigger the number, the more right it goes --->
-    // vh: the bigger the number, the more down it goes 
+    // vw: vertical axis. the bigger the number, the more right it goes --->
+    // vh: horizontal axis. the bigger the number, the more down it goes 
     var vw = window.innerWidth, vh = window.innerHeight;
     // wendy.txt — somewhat near the center (vw:490 is original positioning)
     openWinAt('win-wendy',   'tb-wendy',   Math.round((vw - 390) / 2)+'px', Math.round(vh*0.40)+'px');
@@ -682,13 +682,14 @@ windows are draggable too
     openWinAt('win-about',   'tb-about',   Math.round(vw*0.26)+'px',        Math.round(vh*0.18)+'px');
 
     // Projects — top right, pushed further right and lower than About me
-    openWinAt('win-projects','tb-projects',Math.round(vw*0.63)+'px',        Math.round(vh*0.30)+'px');
+    openWinAt('win-projects','tb-projects',Math.round(vw*0.57)+'px',        Math.round(vh*0.28)+'px');
 
     // Links — bottom left-center
     openWinAt('win-links',   'tb-links',   Math.round(vw*0.28)+'px',        Math.round(vh*0.70)+'px');
 
     // bring wendy.txt to front
     document.getElementById('win-wendy').style.zIndex = ++zTop;
+    document.getElementById('win-projects').style.zIndex = ++zTop;
   }, 200);
 
   // ════════════════════════════════════════════════
